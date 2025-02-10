@@ -14,7 +14,10 @@ console.log("frontend_base_url: ", process.env.frontend_base_url);
 app.use(
   cors({
     credentials: true,
-    origin: process.env.frontend_base_url,
+    origin: [
+      "https://chat-app-with-talk-to-ai-frontend.vercel.app",
+      process.env.frontend_base_url,
+    ],
   })
 );
 app.use(express.urlencoded({ extended: true }));
