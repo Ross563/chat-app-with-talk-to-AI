@@ -10,14 +10,11 @@ import messageRoutes from "./routes/message.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import connectToMongoDB from "./db/db.js";
 import { app, server } from "./socket/socket.js";
-console.log("frontend_base_url: ", process.env.frontend_base_url);
+
 app.use(
   cors({
     credentials: true,
-    origin: [
-      "https://chat-app-with-talk-to-ai-frontend.vercel.app",
-      process.env.frontend_base_url,
-    ],
+    origin: process.env.frontend_base_url,
   })
 );
 app.use(express.urlencoded({ extended: true }));
