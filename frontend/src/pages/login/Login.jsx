@@ -63,6 +63,10 @@ const Login = () => {
               )}
             </button>
           </div>
+          <div className="mt-5">
+            test email : 2222@2222.2222,
+            <br /> test password: 2222@2222.2222
+          </div>
         </form>
       </div>
     </div>
