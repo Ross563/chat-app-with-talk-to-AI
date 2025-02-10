@@ -10,7 +10,7 @@ import messageRoutes from "./routes/message.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import connectToMongoDB from "./db/db.js";
 import { app, server } from "./socket/socket.js";
-console.log("frontend_base_url: ", frontend_base_url);
+console.log("frontend_base_url: ", process.env.frontend_base_url);
 app.use(
   cors({
     credentials: true,
