@@ -1,17 +1,29 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import useLogin from "../../hooks/useLogin";
+import { BiCopy } from "react-icons/bi";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [copied, setCopied] = useState(false);
   const { loading, login } = useLogin();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     await login(email, password);
   };
+
+  function handleCopy() {
+    const email = "2222@2222.2222";
+    navigator.clipboard
+      .writeText(email)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(() => alert("Failed to copy"));
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-w-96 mx-auto">
@@ -63,10 +75,20 @@ const Login = () => {
               )}
             </button>
           </div>
-          <div className="mt-5">
+          {/* <div className="mt-5">
             test email : 2222@2222.2222,
             <br /> test password: 2222@2222.2222
+          </div> */}
+          <div className="mt-8 flex items-center gap-2">
+            <h3>(TEST email == password) = 2222@2222.2222</h3>
+            <BiCopy
+              onClick={handleCopy}
+              className="text-xl cursor-pointer text-gray-600 hover:text-blue-500"
+            >
+              📋 Copy
+            </BiCopy>
           </div>
+          {copied && <p className="text-blue-500">Copied to clipboard!</p>}
         </form>
       </div>
     </div>
