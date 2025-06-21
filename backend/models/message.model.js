@@ -17,6 +17,10 @@ const messageSchema = new mongoose.Schema(
       default: false,
     },
     message: {
+      keyIV: {
+        type: [Number], // IV is also Uint8Array stored as Array
+        default: null,
+      },
       text: {
         type: String,
         required: function () {

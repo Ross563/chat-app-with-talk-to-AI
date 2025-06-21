@@ -26,6 +26,18 @@ const UserSchema = new Schema(
       type: String,
       default: "",
     },
+    publicKey: {
+      type: Object, // Will store the JWK format
+      default: null,
+    },
+    encryptedPrivateKey: {
+      type: String, // Change from [Number] to String (Base64)
+      default: null,
+    },
+    keyIV: {
+      type: String, // Also change this from [Number] to String
+      default: null,
+    },
   },
   { timestamps: true }
 );

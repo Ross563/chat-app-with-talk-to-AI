@@ -10,7 +10,11 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(email, password);
+    try {
+      await login(email, password);
+    } catch (error) {
+      console.error("Login error:", error);
+    }
   };
 
   return (

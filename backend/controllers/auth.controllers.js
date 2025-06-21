@@ -4,7 +4,16 @@ import generateTokenAndSetCookie from "../utils/token-cookie-setter.js";
 
 export const signup = async (req, res) => {
   try {
-    const { email, password, confirmPassword, fullName, gender } = req.body;
+    const {
+      email,
+      password,
+      confirmPassword,
+      fullName,
+      gender,
+      publicKey,
+      encryptedPrivateKey,
+      keyIV,
+    } = req.body;
 
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords don't match" });
@@ -19,13 +28,20 @@ export const signup = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const encryptedPW = await bcrypt.hash(password, salt);
 
-    const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${email}`;
-    const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${email}`;
+    const boyProfilePic = `https://api.dicebear.com/8.x/adventurer/svg?seed=${encodeURIComponent(
+      email
+    )}&gender=male`;
+    const girlProfilePic = `https://api.dicebear.com/8.x/micah/svg?seed=${encodeURIComponent(
+      email
+    )}&gender=female`;
 
     const userDoc = await userModel.create({
       fullName,
       email,
       gender,
+      publicKey,
+      encryptedPrivateKey,
+      keyIV,
       password: encryptedPW,
       profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
     });
@@ -50,16 +66,25 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(422).json({ error: "Email and password are required" });
+    }
+
     const userDoc = await userModel.findOne({ email });
 
     if (!userDoc) {
-      return res.status(422).json({ error: "Email or password is incorrect" });
+      return res
+        .status(422)
+        .json({ error: "Invalid email or password !userDoc" });
     }
 
     const isPasswordOk = bcrypt.compareSync(password, userDoc.password);
 
     if (!isPasswordOk) {
-      return res.status(422).json({ error: "Email or password is incorrect" });
+      return res
+        .status(422)
+        .json({ error: "Invalid email or password !isPasswordOk" });
     }
 
     generateTokenAndSetCookie(userDoc._id, res);
@@ -69,10 +94,13 @@ export const login = async (req, res) => {
       fullName: userDoc.fullName,
       email: userDoc.email,
       profilePic: userDoc.profilePic,
+      publicKey: userDoc.publicKey,
+      encryptedPrivateKey: userDoc.encryptedPrivateKey,
+      keyIV: userDoc.keyIV,
     });
   } catch (e) {
     console.error("User login error:", e);
-    res.status(422).json({ error: "Login failed. Please try again." });
+    res.status(500).json({ error: "Login failed. Please try again." });
   }
 };
 
