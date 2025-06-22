@@ -24,7 +24,9 @@ export default async function generateKeyPair() {
   console.log("Private Key (keep secure!):", privateKeyJwk);
 
   return {
-    publicKey: publicKeyJwk,
-    privateKey: privateKeyJwk,
+    publicKeyJwk,
+    privateKeyJwk,
+    privateCryptoKey: keyPair.privateKey,
+    publicCryptoKey: keyPair.publicKey,
   };
 }

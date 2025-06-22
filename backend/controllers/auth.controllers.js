@@ -10,11 +10,12 @@ export const signup = async (req, res) => {
       confirmPassword,
       fullName,
       gender,
-      publicKey,
+      publicKeyJwk,
       encryptedPrivateKey,
       keyIV,
     } = req.body;
 
+    const publicKey = publicKeyJwk;
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords don't match" });
     }

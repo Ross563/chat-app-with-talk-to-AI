@@ -6,29 +6,28 @@ import cloudinary from "../utils/cloudinary.js";
 
 export const sendMessage = async (req, res) => {
   try {
-    // const { text, KeyIV } = req.body;
     // 👇 Make sure to parse if stringified
-    // const KeyIV =
-    //   typeof req.body.KeyIV === "string"
-    //     ? JSON.parse(req.body.KeyIV)
-    //     : req.body.KeyIV;
+    const keyIV =
+      typeof req.body.keyIV === "string"
+        ? JSON.parse(req.body.keyIV)
+        : req.body.keyIV;
 
     // const text =
     //   typeof req.body.text === "string"
     //     ? JSON.parse(req.body.text)
     //     : req.body.text;
-    const KeyIV =
-      typeof req.body.KeyIV === "string"
-        ? req.body.KeyIV
-        : JSON.stringify(req.body.KeyIV);
 
     const text =
       typeof req.body.text === "string"
         ? req.body.text
         : JSON.stringify(req.body.text);
-
-    console.log("KeyIV from sendMessage controller: ", KeyIV);
-    // const trimmedText = text.trimStart();
+    // console.log("req.body.text from sendMessage controller:", req.body.text);
+    // console.log(
+    //   "typeof req.body.text from sendMessage controller:",
+    //   typeof req.body.text
+    // );
+    // console.log("keyIV from sendMessage controller: ", keyIV);
+    // console.log("typeof keyIV from sendMessage controller: ", typeof keyIV);
     const trimmedText = text;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
@@ -67,7 +66,7 @@ export const sendMessage = async (req, res) => {
       message: {
         text,
         image: imageUrl,
-        KeyIV: KeyIV || null,
+        keyIV: keyIV || null,
       },
     });
 
@@ -125,7 +124,7 @@ export const getMessages = async (req, res) => {
     }).populate("messages");
 
     if (!conversation) return res.status(200).json({});
-    console.log("conversation from message controller :", conversation);
+    // console.log("conversation from message controller :", conversation);
     res.status(200).json(conversation);
   } catch (error) {
     console.log("Error in getMessages controller: ", error.message);

@@ -4,27 +4,10 @@ import useConversation from "../zustand/useConversation";
 import toast from "react-hot-toast";
 import {
   PublicJWKtoCryptoKey,
-  PrivateJWKtoCryptoKey,
   deriveSharedKey,
   decryptMessage,
+  getPrivateKeyFromIndexedDB,
 } from "../utils/helperFunctions";
-
-// Helper to get private key from IndexedDB
-const getPrivateKeyFromIndexedDB = () => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("chatKeys", 1);
-    request.onerror = () => reject(new Error("Failed to open IndexedDB"));
-    request.onsuccess = (event) => {
-      const db = event.target.result;
-      const tx = db.transaction("keys", "readonly");
-      const store = tx.objectStore("keys");
-      const getRequest = store.get("myPrivateKey");
-      getRequest.onsuccess = (e) => resolve(e.target.result);
-      getRequest.onerror = () =>
-        reject(new Error("Failed to retrieve private key"));
-    };
-  });
-};
 
 const useGetMessages = () => {
   const [loading, setLoading] = useState(false);
@@ -39,6 +22,11 @@ const useGetMessages = () => {
         );
         const rawMessages = res.data.messages;
         console.log("rawMessages from useGetMessages.js:", rawMessages);
+        if (rawMessages == null || rawMessages.length === 0) {
+          setMessages([]);
+          setLoading(false);
+          return;
+        }
         if (!Array.isArray(rawMessages))
           throw new Error("Invalid message format");
 
@@ -46,10 +34,10 @@ const useGetMessages = () => {
         const receiverPublicCryptoKey = await PublicJWKtoCryptoKey(
           receiverPublicKeyJwk
         );
-        const senderPrivateKeyJwk = await getPrivateKeyFromIndexedDB();
-        const senderPrivateCryptoKey = await PrivateJWKtoCryptoKey(
-          senderPrivateKeyJwk
-        );
+        const senderPrivateCryptoKey = await getPrivateKeyFromIndexedDB();
+        // const senderPrivateCryptoKey = await PrivateJWKtoCryptoKey(
+        //   senderPrivateKeyJwk
+        // );
         const sharedKey = await deriveSharedKey(
           senderPrivateCryptoKey,
           receiverPublicCryptoKey
@@ -93,42 +81,10 @@ const useGetMessages = () => {
 
     if (selectedConversation?._id) getMessages();
   }, [selectedConversation?._id, setMessages]);
-
-  return { messages, loading };
+  if (!Array.isArray(messages))
+    console.log("messages from useGetMessages.js:", messages);
+  return { messages: Array.isArray(messages) ? messages : [], loading };
+  // return { messages, loading };
 };
 
 export default useGetMessages;
-
-// import { useEffect, useState } from "react";
-// import axios from "axios";
-// import useConversation from "../zustand/useConversation";
-// import toast from "react-hot-toast";
-
-// const useGetMessages = () => {
-//   const [loading, setLoading] = useState(false);
-//   const { messages, setMessages, selectedConversation } = useConversation();
-
-//   useEffect(() => {
-//     const getMessages = async () => {
-//       setLoading(true);
-//       try {
-//         const res = await axios.get(
-//           `/api/messages/${selectedConversation._id}`
-//         );
-//         const data = res.data.messages;
-//         // console.log("data of messages (Array)from useGetMessages.js :", data);
-//         if (data.error) throw new Error(data.error);
-//         setMessages(data);
-//       } catch (error) {
-//         toast.error(`error in useGetMessages hook: ${error.message}`);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     if (selectedConversation?._id) getMessages();
-//   }, [selectedConversation?._id, setMessages]);
-
-//   return { messages, loading };
-// };
-// export default useGetMessages;

@@ -16,6 +16,7 @@ router.post(
   "/send/:id",
   protectRoute,
   upload.single("image"), // Ensure this matches the form-data key in frontend
+  // upload.any(), // Allows any file type, adjust as needed
   sendMessage
 );
 
