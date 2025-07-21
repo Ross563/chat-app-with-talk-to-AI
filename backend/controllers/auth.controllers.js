@@ -54,6 +54,7 @@ export const signup = async (req, res) => {
         fullName: userDoc.fullName,
         email: userDoc.email,
         profilePic: userDoc.profilePic,
+        gender: userDoc.gender,
       });
     } else {
       res.status(400).json({ error: "Invalid user data" });
@@ -94,6 +95,7 @@ export const login = async (req, res) => {
       _id: userDoc._id,
       fullName: userDoc.fullName,
       email: userDoc.email,
+      gender: userDoc.gender,
       profilePic: userDoc.profilePic,
       publicKey: userDoc.publicKey,
       encryptedPrivateKey: userDoc.encryptedPrivateKey,

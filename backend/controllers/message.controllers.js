@@ -1,12 +1,13 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 import { getReceiverSocketId, io } from "../socket/socket.js";
-import { generateResult } from "../utils/aiModel.js";
 import cloudinary from "../utils/cloudinary.js";
 
 export const sendMessage = async (req, res) => {
   try {
     // 👇 Make sure to parse if stringified
+    const isQueryFromAI = req.body.isQueryFromAI;
+
     const keyIV =
       typeof req.body.keyIV === "string"
         ? JSON.parse(req.body.keyIV)
@@ -21,13 +22,14 @@ export const sendMessage = async (req, res) => {
       typeof req.body.text === "string"
         ? req.body.text
         : JSON.stringify(req.body.text);
-    // console.log("req.body.text from sendMessage controller:", req.body.text);
-    // console.log(
-    //   "typeof req.body.text from sendMessage controller:",
-    //   typeof req.body.text
-    // );
-    // console.log("keyIV from sendMessage controller: ", keyIV);
-    // console.log("typeof keyIV from sendMessage controller: ", typeof keyIV);
+
+    console.log("req.body.text from sendMessage controller:", req.body.text);
+    console.log(
+      "typeof req.body.text from sendMessage controller:",
+      typeof req.body.text
+    );
+    console.log("keyIV from sendMessage controller: ", keyIV);
+    console.log("typeof keyIV from sendMessage controller: ", typeof keyIV);
     const trimmedText = text;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
@@ -63,6 +65,7 @@ export const sendMessage = async (req, res) => {
     const newMessage = new Message({
       senderId,
       receiverId,
+      isQueryFromAI,
       message: {
         text,
         image: imageUrl,
@@ -72,42 +75,52 @@ export const sendMessage = async (req, res) => {
 
     if (newMessage) {
       conversation.messages.push(newMessage._id);
-      // console.log("newMessage :", newMessage);
+      console.log("newMessage :", newMessage);
     }
 
     await Promise.all([conversation.save(), newMessage.save()]);
+    console.log("newMessage saved to database");
     const receiverSocketId = getReceiverSocketId(receiverId);
+    console.log("receiverSocketId :", receiverSocketId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
+      console.log("newMessage emitted to receiver");
     }
 
-    const isQueryFromAI = trimmedText.startsWith("@ai");
+    // if (isQueryFromAI) {
+    //   const ciphertextAI =
+    //     typeof req.body.ciphertextAI === "string"
+    //       ? req.body.ciphertextAI
+    //       : JSON.parse(req.body.ciphertextAI);
 
-    if (isQueryFromAI) {
-      const prompt = trimmedText.replace("@ai", "");
-      const result = await generateResult(prompt);
-      // console.log("result from sendMessage controller: ", result);
-      const newMessage2 = new Message({
-        senderId,
-        receiverId,
-        isQueryFromAI: true,
-        message: {
-          text: result,
-        },
-      });
+    //   const keyIVAI =
+    //     typeof req.body.keyIVAI === "string"
+    //       ? JSON.parse(req.body.keyIVAI)
+    //       : req.body.keyIVAI;
 
-      if (newMessage2) {
-        conversation.messages.push(newMessage2._id);
-        // console.log("newMessage2 :", newMessage2);
-      }
+    //   // console.log("result from sendMessage controller: ", result);
+    //   const newMessage2 = new Message({
+    //     senderId,
+    //     receiverId,
+    //     isQueryFromAI: true,
+    //     message: {
+    //       text: ciphertextAI,
+    //       keyIV: keyIVAI,
+    //     },
+    //   });
 
-      await Promise.all([conversation.save(), newMessage2.save()]);
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit("newMessage", newMessage2);
-      }
-      return res.status(201).json(newMessage2);
-    }
-    if (!isQueryFromAI) return res.status(201).json(newMessage);
+    //   if (newMessage2) {
+    //     conversation.messages.push(newMessage2._id);
+    //     console.log("newMessage2 :", newMessage2);
+    //   }
+
+    //   await Promise.all([conversation.save(), newMessage2.save()]);
+    //   if (receiverSocketId) {
+    //     io.to(receiverSocketId).emit("newMessage", newMessage2);
+    //   }
+    //   return res.status(201).json(newMessage2);
+    // }
+    return res.status(201).json(newMessage);
   } catch (error) {
     console.log("Error in sendMessage controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
