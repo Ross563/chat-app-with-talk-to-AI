@@ -11,6 +11,8 @@ export const useSocketContext = () => {
 export const SocketContextProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [typingUsers, setTypingUsers] = useState({});
+  const [messageStatuses, setMessageStatuses] = useState({});
   const { authUser } = useAuthContext();
 
   useEffect(() => {
@@ -27,6 +29,20 @@ export const SocketContextProvider = ({ children }) => {
         setOnlineUsers(users);
       });
 
+      socket.on("userTyping", ({ senderId, isTyping }) => {
+        setTypingUsers((prev) => ({
+          ...prev,
+          [senderId]: isTyping,
+        }));
+      });
+
+      socket.on("messageStatusUpdate", ({ messageId, status }) => {
+        setMessageStatuses((prev) => ({
+          ...prev,
+          [messageId]: status,
+        }));
+      });
+
       return () => socket.close();
     } else {
       if (socket) {
@@ -36,8 +52,16 @@ export const SocketContextProvider = ({ children }) => {
     }
   }, [authUser]);
 
+  const emitTyping = (receiverId, isTyping) => {
+    if (socket) {
+      socket.emit("typing", { receiverId, isTyping });
+    }
+  };
+
   return (
-    <SocketContext.Provider value={{ socket, onlineUsers }}>
+    <SocketContext.Provider
+      value={{ socket, onlineUsers, typingUsers, emitTyping, messageStatuses }}
+    >
       {children}
     </SocketContext.Provider>
   );

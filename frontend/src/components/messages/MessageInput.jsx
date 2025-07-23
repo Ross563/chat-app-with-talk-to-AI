@@ -1,13 +1,45 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { BsFillImageFill, BsSend } from "react-icons/bs";
 import useSendMessage from "../../hooks/useSendMessage";
+import { useSocketContext } from "../../context/SocketContext";
+import useConversation from "../../zustand/useConversation";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
   const imageRef = useRef(null);
-  console.log("image : ", image);
+  const typingTimeoutRef = useRef(null);
   const { loading, sendMessage } = useSendMessage();
+  const { emitTyping } = useSocketContext();
+  const { selectedConversation } = useConversation();
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleTyping = (e) => {
+    const newText = e.target.value;
+    setText(newText);
+
+    if (selectedConversation?._id) {
+      // Clear any existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Emit typing start
+      emitTyping(selectedConversation._id, true);
+
+      // Set timeout to stop typing indicator
+      typingTimeoutRef.current = setTimeout(() => {
+        emitTyping(selectedConversation._id, false);
+      }, 2000);
+    }
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0] || null;
@@ -17,6 +49,12 @@ const MessageInput = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text && !image) return;
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      emitTyping(selectedConversation._id, false);
+    }
+
     const message = { text, image };
     await sendMessage(message);
     setText("");
@@ -29,12 +67,12 @@ const MessageInput = () => {
         <div className="w-full flex justify-between items-center ">
           <input
             type="text"
-            className=" text-sm rounded-l-lg w-full p-2.5  bg-gray-700 text-white border-gray-700"
+            className="text-sm rounded-l-lg w-full p-2.5 bg-gray-700 text-white border-gray-700"
             placeholder="Send a message"
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleTyping}
           />
-          <div className=" flex items-center gap-5 rounded-r-lg bg-gray-700 p-2.5 text-sm text-white">
+          <div className="flex items-center gap-5 rounded-r-lg bg-gray-700 p-2.5 text-sm text-white">
             <BsFillImageFill
               size={20}
               onClick={() => imageRef.current.click()}
@@ -47,7 +85,7 @@ const MessageInput = () => {
               onChange={handleImageChange}
             />
 
-            <button type="submit" className=" flex items-center">
+            <button type="submit" className="flex items-center">
               {loading ? (
                 <div className="loading loading-spinner"></div>
               ) : (
