@@ -12,6 +12,7 @@ const useGetConversations = () => {
       try {
         const res = await axios.get("/api/users");
         const data = res.data;
+        console.log("data from useGetConversations: ", data);
         if (data.error) {
           throw new Error(data.error);
         }
