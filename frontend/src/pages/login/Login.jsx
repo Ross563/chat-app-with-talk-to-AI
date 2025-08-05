@@ -1,12 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import useLogin from "../../hooks/useLogin";
+import { FaCopy } from "react-icons/fa";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [copyEmailSuccess, setCopyEmailSuccess] = useState(false);
 
   const { loading, login } = useLogin();
+
+  const testEmail = "2222@2222.2222";
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(testEmail);
+    setCopyEmailSuccess(true);
+    setTimeout(() => setCopyEmailSuccess(false), 2000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,9 +77,30 @@ const Login = () => {
               )}
             </button>
           </div>
-          <div className="mt-5">
-            test email : 2222@2222.2222,
-            <br /> test password: 2222@2222.2222
+          <div className="mt-5 text-sm">
+            <div className="flex items-center gap-2 mb-1">
+              <span>Test email: {testEmail}</span>
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="p-1 rounded bg-gray-700 transition-colors"
+                title="Copy email"
+              >
+                <FaCopy
+                  className={
+                    copyEmailSuccess ? "text-green-500" : "text-gray-400"
+                  }
+                />
+              </button>
+              {copyEmailSuccess && (
+                <span className="text-xs text-green-500 bg-gray-200 rounded-md p-1">
+                  Copied!
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <span>Test password {" = Test email"}</span>
+            </div>
           </div>
         </form>
       </div>
