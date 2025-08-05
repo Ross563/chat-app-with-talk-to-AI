@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import LogoutButton from "./sidebar/LogoutButton";
 import { RiLockPasswordLine } from "react-icons/ri";
 
 const Navbar = () => {
   const { authUser } = useAuthContext();
+  const location = useLocation();
 
   return (
     <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-3 px-6 shadow-lg">
@@ -19,18 +20,22 @@ const Navbar = () => {
         <div className="flex items-center space-x-6">
           {!authUser ? (
             <div className="flex items-center space-x-4">
-              <Link
-                to="/login"
-                className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
-              >
-                <span>Login</span>
-              </Link>
-              <Link
-                to="/signup"
-                className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
-              >
-                <span>Sign Up</span>
-              </Link>
+              {location.pathname !== "/login" && (
+                <Link
+                  to="/login"
+                  className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                >
+                  <span>Login</span>
+                </Link>
+              )}
+              {location.pathname !== "/signup" && (
+                <Link
+                  to="/signup"
+                  className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                >
+                  <span>Sign Up</span>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="flex items-center space-x-4">
