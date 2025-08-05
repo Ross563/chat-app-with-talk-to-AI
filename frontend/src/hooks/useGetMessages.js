@@ -89,10 +89,12 @@ const useGetMessages = () => {
 
     if (selectedConversation?._id) getMessages();
   }, [selectedConversation?._id, selectedConversation?.publicKey, setMessages]);
-  if (!Array.isArray(messages))
+  if (!Array.isArray(messages)) {
     // console.log("messages from useGetMessages.js:", messages);
-    return { messages: Array.isArray(messages) ? messages : [], loading };
-  // return { messages, loading };
+    return { messages: [], loading };
+  }
+
+  return { messages, loading };
 };
 
 export default useGetMessages;
