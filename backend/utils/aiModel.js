@@ -53,7 +53,6 @@ You are an AI assistant integrated into a chat application. Your goal is to prov
 
 Follow these guidelines carefully to ensure a smooth, safe, and efficient user experience.
 `;
-
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
 const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",

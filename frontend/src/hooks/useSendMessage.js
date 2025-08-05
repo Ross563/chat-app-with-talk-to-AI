@@ -51,16 +51,25 @@ const useSendMessage = () => {
       );
 
       // 🔒 Encrypt the message text
-      const { ciphertext, iv } = await encryptMessage(sharedKey, message.text);
-      message.text = ciphertext;
-      message.keyIV = iv;
-      // console.log("message.keyIV in useSendMessage.js:", message.keyIV);
-      // console.log("type of iv in useSendMessage.js:", typeof iv);
-      // console.log("ciphertext in useSendMessage.js: ", ciphertext);
-      // console.log(
-      //   "typeof ciphertext in useSendMessage.js: ",
-      //   typeof ciphertext
-      // );
+      if (!message.isQueryFromAI) {
+        // console.log(
+        //   "message.isQueryFromAI in useSendMessage.js:",
+        //   message.isQueryFromAI
+        // );
+        const { ciphertext, iv } = await encryptMessage(
+          sharedKey,
+          message.text
+        );
+        message.text = ciphertext;
+        message.keyIV = iv;
+        // console.log("message.keyIV in useSendMessage.js:", message.keyIV);
+        // console.log("type of iv in useSendMessage.js:", typeof iv);
+        // console.log("ciphertext in useSendMessage.js: ", ciphertext);
+        // console.log(
+        //   "typeof ciphertext in useSendMessage.js: ",
+        //   typeof ciphertext
+        // );
+      }
       // 📦 Prepare form data
       const formData = new FormData();
       Object.entries(message).forEach(([key, value]) => {
@@ -82,7 +91,7 @@ const useSendMessage = () => {
       );
 
       const data = res.data;
-      console.log("Data from useSendMessage.js:", data);
+      //console.log("Data from useSendMessage.js:", data);
       if (data.error) throw new Error(data.error);
 
       // console.log(
@@ -101,14 +110,15 @@ const useSendMessage = () => {
       //   "type of IV used for decryption at frontend sent from backend:",
       //   typeof data.message.keyIV
       // );
-      const decryptedMessage = await decryptMessage(
-        sharedKey,
-        data.message.text,
-        data.message.keyIV
-      );
-      // console.log("Decrypted Message in useSendMessages :", decryptedMessage);
-      data.message.text = decryptedMessage;
-
+      if (!message.isQueryFromAI) {
+        const decryptedMessage = await decryptMessage(
+          sharedKey,
+          data.message.text,
+          data.message.keyIV
+        );
+        // console.log("Decrypted Message in useSendMessages :", decryptedMessage);
+        data.message.text = decryptedMessage;
+      }
       setMessages([...messages, data]);
     } catch (error) {
       console.error("Error in useSendMessage hook:", error);

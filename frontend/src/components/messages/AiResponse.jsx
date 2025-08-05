@@ -14,7 +14,12 @@ const AiResponse = ({ message }) => {
     ? authUser.profilePic
     : selectedConversation?.profilePic;
   const bubbleBgColor = fromMe ? "bg-blue-500" : "";
-  const messageObject = JSON.parse(message.message.text);
+  const messageObject = message.message.text
+    ? JSON.parse(message.message.text)
+    : {
+        query: "error generating response",
+        response: "error generating response",
+      };
   const shakeClass = message.shouldShake ? "shake" : "";
 
   return (

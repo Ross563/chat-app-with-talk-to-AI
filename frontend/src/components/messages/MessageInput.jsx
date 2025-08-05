@@ -49,14 +49,21 @@ const MessageInput = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text && !image) return;
+    const trimmedText = text.trim();
+    const isQueryFromAI = trimmedText.startsWith("@ai");
+
+    const message = {
+      text: isQueryFromAI ? trimmedText.replace("@ai", "") : trimmedText,
+      image,
+      isQueryFromAI,
+    };
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
       emitTyping(selectedConversation._id, false);
     }
-
-    const message = { text, image };
     await sendMessage(message);
+
     setText("");
     setImage(null);
   };
@@ -68,7 +75,7 @@ const MessageInput = () => {
           <input
             type="text"
             className="text-sm rounded-l-lg w-full p-2.5 bg-gray-700 text-white border-gray-700"
-            placeholder="Send a message"
+            placeholder="Type @ai before your question to ask from AI"
             value={text}
             onChange={handleTyping}
           />
