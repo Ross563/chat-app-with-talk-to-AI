@@ -46,9 +46,9 @@ const Message = ({ message }) => {
     const getStatusIcon = () => {
       switch (currentStatus) {
         case "sent":
-          return <BsCheck className="text-gray-200" size={16} />;
+          return <BsCheck className="text-black" size={16} />;
         case "delivered":
-          return <BsCheckAll className="text-gray-200" size={16} />;
+          return <BsCheckAll className="text-black" size={16} />;
         case "seen":
           return <BsCheckAll className="text-blue-700" size={16} />;
         default:
@@ -96,7 +96,7 @@ const Message = ({ message }) => {
           <p className="break-words">{message.message.text}</p>
         </div>
       )}
-      <div className="chat-footer opacity-50 text-xs flex gap-1 items-center bg-white rounded-md p-1 text-gray-700">
+      <div className="chat-footer opacity-50 text-xs flex gap-1 items-center bg-white rounded-md p-1 text-black">
         {formattedTime}
         <MessageStatus />
       </div>

@@ -35,7 +35,7 @@ const AiResponse = ({ message }) => {
         >
           {messageObject.query}
         </div>
-        <div className="chat-footer opacity-50 text-xs flex gap-1 items-center">
+        <div className="chat-footer opacity-50 text-xs flex gap-1 items-center bg-white rounded-md p-1 text-black">
           {formattedTime}
         </div>
       </div>
@@ -53,7 +53,7 @@ const AiResponse = ({ message }) => {
             <Markdown>{messageObject.response}</Markdown>
           </div>
         </div>
-        <div className="chat-footer opacity-50 text-xs flex gap-1 items-center">
+        <div className="chat-footer opacity-50 text-xs flex gap-1 items-center bg-white rounded-md p-1 text-black">
           {formattedTime}
         </div>
       </div>
