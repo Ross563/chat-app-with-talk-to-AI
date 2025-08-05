@@ -21,7 +21,7 @@ const useGetMessages = () => {
           `/api/messages/${selectedConversation._id}`
         );
         const rawMessages = res.data.messages;
-        console.log("rawMessages from useGetMessages.js:", rawMessages);
+        //console.log("rawMessages from useGetMessages.js:", rawMessages);
         if (rawMessages == null || rawMessages.length === 0) {
           setMessages([]);
           setLoading(false);
@@ -46,25 +46,33 @@ const useGetMessages = () => {
         const decryptedMessages = await Promise.all(
           rawMessages.map(async (msg) => {
             try {
-              const iv = msg.message?.KeyIV ?? msg.message?.keyIV ?? [];
-              const decryptedText = await decryptMessage(
-                sharedKey,
-                msg.message.text,
-                iv
-              );
-              return {
-                ...msg,
-                message: {
-                  ...msg.message,
-                  text: decryptedText,
-                },
-              };
+              // Only decrypt messages that aren't from AI
+              if (!msg.isQueryFromAI || msg.isQueryFromAI === "false") {
+                const iv = msg.message?.KeyIV ?? msg.message?.keyIV ?? [];
+                const decryptedText = await decryptMessage(
+                  sharedKey,
+                  msg.message.text,
+                  iv
+                );
+                return {
+                  ...msg,
+                  message: {
+                    ...msg.message,
+                    text: decryptedText,
+                  },
+                };
+              } else {
+                // Return AI messages as is, no decryption needed
+                // console.log("Skipping decryption for AI message:", msg._id);
+                return msg;
+              }
             } catch (err) {
               console.error("Failed to decrypt message:", {
                 error: err,
                 ciphertext: msg.message.text,
                 type: typeof msg.message.text,
                 iv: msg.message?.KeyIV ?? msg.message?.keyIV,
+                isQueryFromAI: msg.isQueryFromAI,
               });
               return msg;
             }
@@ -80,10 +88,10 @@ const useGetMessages = () => {
     };
 
     if (selectedConversation?._id) getMessages();
-  }, [selectedConversation?._id, setMessages]);
+  }, [selectedConversation?._id, selectedConversation?.publicKey, setMessages]);
   if (!Array.isArray(messages))
-    console.log("messages from useGetMessages.js:", messages);
-  return { messages: Array.isArray(messages) ? messages : [], loading };
+    // console.log("messages from useGetMessages.js:", messages);
+    return { messages: Array.isArray(messages) ? messages : [], loading };
   // return { messages, loading };
 };
 
